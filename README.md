@@ -135,14 +135,17 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 - Ghostty installs as a native macOS app
 
 ### Debian / Ubuntu
+- Optionally configures the [Tsinghua TUNA apt mirror](https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/) before installing packages
 - CLI tools install via apt where available, GitHub releases for others (delta, lazygit, eza)
 - `bat` → `batcat`, `fd` → `fdfind` — symlinks are created automatically
 - Fonts install to `~/.local/share/fonts/`
 - Ghostty is not in apt — install manually via [snap, build from source](https://ghostty.org/docs/install), or use another terminal
 - Zsh plugins install via apt or git clone
+- Existing apt source files are backed up before mirror changes; if TUNA is already configured, the script skips rewriting it
 
 ### Windows (WSL)
 - Everything runs inside WSL (Ubuntu/Debian layer)
+- Optional TUNA mirror configuration works well for WSL users in China
 - Terminal emulator runs on the Windows side — use [Windows Terminal](https://aka.ms/terminal) or [Ghostty for Windows](https://ghostty.org)
 - Script detects WSL automatically and adapts
 - If run in native Windows (MINGW/Git Bash), the script will prompt you to install WSL

@@ -135,14 +135,17 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 - Ghostty 作为原生 macOS 应用安装
 
 ### Debian / Ubuntu
+- 安装软件前可选配置 [清华 TUNA apt 镜像源](https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/)
 - CLI 工具优先用 apt 安装，apt 没有的从 GitHub releases 下载（delta、lazygit、eza）
 - `bat` 在 Debian 上叫 `batcat`，`fd` 叫 `fdfind` — 脚本会自动创建软链接
 - 字体安装到 `~/.local/share/fonts/`
 - Ghostty 不在 apt 里 — 可通过 [snap、源码编译](https://ghostty.org/docs/install) 安装，或用其他终端
 - Zsh 插件通过 apt 或 git clone 安装
+- 修改 apt 源前会自动备份原始源文件；如果已经是清华源，脚本会跳过，不重复覆盖
 
 ### Windows (WSL)
 - 所有操作在 WSL 内部执行（Ubuntu/Debian 层）
+- 国内 WSL 用户可以选择启用清华 TUNA apt 镜像源
 - 终端模拟器在 Windows 侧运行 — 推荐 [Windows Terminal](https://aka.ms/terminal) 或 [Ghostty for Windows](https://ghostty.org)
 - 脚本自动检测 WSL 环境并适配
 - 如果在原生 Windows（MINGW/Git Bash）中运行，脚本会提示安装 WSL

@@ -192,6 +192,104 @@ has_cmd() {
     command -v "$1" &>/dev/null
 }
 
+configure_apt_tuna_mirror() {
+    if [[ "$OS" != "debian" && "$OS" != "wsl" ]]; then
+        return 0
+    fi
+
+    echo ""
+    echo -e "  Use Tsinghua TUNA apt mirror for faster downloads in China?"
+    echo -e "  Mirror: ${BOLD}https://mirrors.tuna.tsinghua.edu.cn${NC}"
+    printf "  Configure apt mirror? (y/N): "
+    read -r CONFIGURE_APT_MIRROR
+    if [[ ! "$CONFIGURE_APT_MIRROR" =~ ^[Yy]$ ]]; then
+        info "Keeping existing apt sources"
+        return 0
+    fi
+
+    local codename
+    codename=""
+    if has_cmd lsb_release; then
+        codename="$(lsb_release -cs 2>/dev/null || true)"
+    fi
+    if [[ -z "$codename" && -r /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        source /etc/os-release
+        codename="${VERSION_CODENAME:-}"
+    fi
+    if [[ -z "$codename" ]]; then
+        warn "Could not detect Debian/Ubuntu codename — skipping apt mirror configuration"
+        return 0
+    fi
+
+    local mirror="https://mirrors.tuna.tsinghua.edu.cn/ubuntu"
+    local security_mirror="$mirror"
+    local components="main restricted universe multiverse"
+    local signed_by="/usr/share/keyrings/ubuntu-archive-keyring.gpg"
+    local deb822_file=""
+    if [[ -r /etc/os-release ]] && grep -qi '^ID=debian' /etc/os-release; then
+        mirror="https://mirrors.tuna.tsinghua.edu.cn/debian"
+        security_mirror="https://mirrors.tuna.tsinghua.edu.cn/debian-security"
+        components="main contrib non-free non-free-firmware"
+        signed_by="/usr/share/keyrings/debian-archive-keyring.gpg"
+    fi
+
+    local timestamp
+    timestamp="$(date +%s)"
+    info "Configuring apt mirror for $codename..."
+
+    if [[ -f /etc/apt/sources.list.d/ubuntu.sources ]]; then
+        deb822_file="/etc/apt/sources.list.d/ubuntu.sources"
+    elif [[ -f /etc/apt/sources.list.d/debian.sources ]]; then
+        deb822_file="/etc/apt/sources.list.d/debian.sources"
+    fi
+
+    if [[ -n "$deb822_file" ]]; then
+        if grep -q "mirrors.tuna.tsinghua.edu.cn" "$deb822_file" 2>/dev/null; then
+            success "apt mirror already configured: $deb822_file"
+            return 0
+        fi
+        run_cmd sudo cp "$deb822_file" "${deb822_file}.bak.$timestamp"
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} write TUNA DEB822 sources to $deb822_file"
+        else
+            sudo tee "$deb822_file" >/dev/null <<EOF
+Types: deb
+URIs: $mirror
+Suites: $codename ${codename}-updates ${codename}-backports
+Components: $components
+Signed-By: $signed_by
+
+Types: deb
+URIs: $security_mirror
+Suites: ${codename}-security
+Components: $components
+Signed-By: $signed_by
+EOF
+        fi
+    else
+        if [[ -f /etc/apt/sources.list ]] && grep -q "mirrors.tuna.tsinghua.edu.cn" /etc/apt/sources.list 2>/dev/null; then
+            success "apt mirror already configured: /etc/apt/sources.list"
+            return 0
+        fi
+        if [[ -f /etc/apt/sources.list ]]; then
+            run_cmd sudo cp /etc/apt/sources.list "/etc/apt/sources.list.bak.$timestamp"
+        fi
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} write TUNA apt sources to /etc/apt/sources.list"
+        else
+            sudo tee /etc/apt/sources.list >/dev/null <<EOF
+deb $mirror $codename $components
+deb $mirror ${codename}-updates $components
+deb $mirror ${codename}-backports $components
+deb $security_mirror ${codename}-security $components
+EOF
+        fi
+    fi
+
+    success "apt mirror configured"
+}
+
 # ─── Step 1: Package Manager ────────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
@@ -215,6 +313,7 @@ case "$OS" in
         fi
         ;;
     debian|wsl)
+        configure_apt_tuna_mirror
         info "Updating apt package index..."
         run_cmd sudo apt-get update
         # Ensure basic build tools are available
