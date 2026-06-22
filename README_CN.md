@@ -103,6 +103,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[tldr](https://github.com/tldr-pages/tldr)** | 简化版 man 手册，附带示例 |
 | **[delta](https://github.com/dandavison/delta)** | 带语法高亮的 git diff |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git 终端 UI |
+| **[aria2](https://aria2.github.io)** | 支持断点续传和多连接的大文件下载器 |
+| **[FFmpeg](https://ffmpeg.org)** | 音视频转换、探测、抽帧工具（可选） |
 | **[fnm](https://github.com/Schniz/fnm)** | 快速 Node 版本管理器（Rust 编写） |
 | **[pnpm](https://pnpm.io)** | 快速、省磁盘空间的 Node 包管理器 |
 | **[uv](https://docs.astral.sh/uv/)** | 快速 Python 包/项目管理器 |
@@ -110,6 +112,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[pipx](https://pipx.pypa.io)** | 隔离安装 Python 命令行工具 |
 | **[direnv](https://direnv.net)** | 按项目自动加载环境变量 |
 | **[nvtop](https://github.com/Syllo/nvtop)** | GPU 进程监控，适合机器学习/深度学习 |
+| **[hfd](https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f)** | Hugging Face 下载器（可选，社区脚本） |
 | **[Zellij](https://zellij.dev)** | 现代终端复用器（可选） |
 
 ## 脚本做了什么
@@ -119,7 +122,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 3. 下载 **MesloLGS NF** Nerd 字体
 4. 安装你选择的 **Shell** + 插件
 5. 安装所有 **CLI 工具**（macOS 用 Homebrew，Linux 用 apt + GitHub releases）
-6. 安装 **Python / 深度学习开发辅助工具**（`uv`、`python3-venv`、`pipx`、`direnv`、`nvtop`）
+6. 安装 **Python / 深度学习开发辅助工具**（`uv`、`python3-venv`、`pipx`、`direnv`、`nvtop`），并可选安装 **hfd**
 7. 安装 **Starship** 提示符 + Catppuccin Mocha 配置
 8. 安装 **fnm** + **Node.js** LTS（可选），如果有 Node 会继续安装 **pnpm**
 9. 安装 **Zellij** 终端复用器（可选）
@@ -184,6 +187,7 @@ uv pip install torch numpy      # 安装 Python 包
 pipx install ruff               # 隔离安装 Python CLI 工具
 direnv allow                    # 信任当前项目的 .envrc
 nvtop                           # 查看 GPU 使用率和进程
+hfd Qwen/Qwen2.5-7B-Instruct --local-dir models/qwen2.5-7b -x 16
 ```
 
 深度学习项目里的 `.envrc` 示例：
@@ -193,6 +197,19 @@ source .venv/bin/activate
 export CUDA_VISIBLE_DEVICES=0
 export HF_HOME=/data/hf-cache
 ```
+
+`hfd` 是可选项，因为它是社区下载脚本，不是 Hugging Face 官方 CLI。脚本会先询问，确认后才安装。
+
+## 下载 / 媒体处理工具
+
+```bash
+aria2c -x 16 -s 16 -c URL       # 多连接断点续传下载
+ffmpeg -i input.mp4 output.mp3  # 提取/转换音频
+ffmpeg -i input.mp4 -vf fps=1 frames/%06d.jpg
+ffprobe input.mp4               # 查看媒体元信息
+```
+
+FFmpeg 是可选项，脚本会先询问，确认后才安装。
 
 ## SSH Key 切换
 

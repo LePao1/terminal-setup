@@ -103,6 +103,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[tldr](https://github.com/tldr-pages/tldr)** | Simplified man pages with examples |
 | **[delta](https://github.com/dandavison/delta)** | Beautiful git diffs with syntax highlighting |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git TUI |
+| **[aria2](https://aria2.github.io)** | Fast downloader with resume and parallel connections |
+| **[FFmpeg](https://ffmpeg.org)** | Audio/video conversion, probing, and frame extraction (optional) |
 | **[fnm](https://github.com/Schniz/fnm)** | Fast Node Manager (Rust) |
 | **[pnpm](https://pnpm.io)** | Fast, disk-efficient Node package manager |
 | **[uv](https://docs.astral.sh/uv/)** | Fast Python package/project manager |
@@ -110,6 +112,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[pipx](https://pipx.pypa.io)** | Isolated installer for Python CLI tools |
 | **[direnv](https://direnv.net)** | Per-project environment variables |
 | **[nvtop](https://github.com/Syllo/nvtop)** | GPU process monitor for ML workloads |
+| **[hfd](https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f)** | Hugging Face downloader (optional, community script) |
 | **[Zellij](https://zellij.dev)** | Modern terminal multiplexer (optional) |
 
 ## What It Does
@@ -119,7 +122,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 3. Downloads **MesloLGS NF** nerd fonts
 4. Installs your **shell** of choice + plugins
 5. Installs all **CLI tools** (Homebrew on macOS, apt + GitHub releases on Linux)
-6. Installs **Python / ML dev helpers** (`uv`, `python3-venv`, `pipx`, `direnv`, `nvtop`)
+6. Installs **Python / ML dev helpers** (`uv`, `python3-venv`, `pipx`, `direnv`, `nvtop`) and optionally **hfd**
 7. Installs **Starship** prompt with Catppuccin Mocha config
 8. Installs **fnm** + **Node.js** LTS (optional), then installs **pnpm** when Node is available
 9. Installs **Zellij** terminal multiplexer (optional)
@@ -184,6 +187,7 @@ uv pip install torch numpy      # Install Python packages
 pipx install ruff               # Install isolated Python CLI tools
 direnv allow                    # Trust this project's .envrc
 nvtop                           # Monitor GPU usage/processes
+hfd Qwen/Qwen2.5-7B-Instruct --local-dir models/qwen2.5-7b -x 16
 ```
 
 Example `.envrc` for a deep learning project:
@@ -193,6 +197,19 @@ source .venv/bin/activate
 export CUDA_VISIBLE_DEVICES=0
 export HF_HOME=/data/hf-cache
 ```
+
+`hfd` is optional because it is a community downloader script, not an official Hugging Face CLI. The setup script prompts before installing it.
+
+## Downloads / Media Tools
+
+```bash
+aria2c -x 16 -s 16 -c URL       # Parallel download with resume
+ffmpeg -i input.mp4 output.mp3  # Extract/convert audio
+ffmpeg -i input.mp4 -vf fps=1 frames/%06d.jpg
+ffprobe input.mp4               # Inspect media metadata
+```
+
+FFmpeg is optional. The setup script prompts before installing it.
 
 ## SSH Key Switcher
 

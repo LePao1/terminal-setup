@@ -5,7 +5,7 @@
 # Platforms: macOS, Debian/Ubuntu, Windows (via WSL)
 #
 # Stack: Ghostty + (Fish or Zsh) + Starship + Nerd Font (MesloLGS)
-# Tools: bat, eza, fd, ripgrep, btop, zoxide, jq, tldr, delta, lazygit, fzf
+# Tools: bat, eza, fd, ripgrep, btop, zoxide, jq, tldr, delta, lazygit, fzf, aria2
 # ML/dev: uv, python3-venv, pipx, direnv, nvtop
 # Node:  fnm (Fast Node Manager) + pnpm — works with both Fish and Zsh
 # Theme: Catppuccin Mocha (Starship)
@@ -469,7 +469,7 @@ echo -e "${BOLD}  🛠  Step 5/10: CLI Tools${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 install_cli_tools_macos() {
-    local TOOLS=(bat eza fd ripgrep btop zoxide jq tldr git-delta lazygit fzf)
+    local TOOLS=(bat eza fd ripgrep btop zoxide jq tldr git-delta lazygit fzf aria2)
     for tool in "${TOOLS[@]}"; do
         if brew list "$tool" &>/dev/null; then
             success "$tool already installed"
@@ -483,7 +483,7 @@ install_cli_tools_macos() {
 
 install_cli_tools_linux() {
     # Tools available directly from apt (on modern Debian/Ubuntu)
-    local APT_TOOLS=(bat fd-find ripgrep jq fzf)
+    local APT_TOOLS=(bat fd-find ripgrep jq fzf aria2)
 
     for tool in "${APT_TOOLS[@]}"; do
         if dpkg -s "$tool" &>/dev/null 2>&1; then
@@ -614,6 +614,34 @@ case "$OS" in
     debian|wsl) install_cli_tools_linux ;;
 esac
 
+install_ffmpeg() {
+    if has_cmd ffmpeg; then
+        success "ffmpeg already installed"
+        return 0
+    fi
+
+    echo ""
+    echo -e "  ffmpeg is useful for audio/video conversion, probing, and frame extraction."
+    printf "  Install ffmpeg? (y/N): "
+    read -r INSTALL_FFMPEG
+    if [[ "$INSTALL_FFMPEG" =~ ^[Yy]$ ]]; then
+        info "Installing ffmpeg..."
+        case "$OS" in
+            macos)
+                run_cmd brew install ffmpeg
+                ;;
+            debian|wsl)
+                run_cmd sudo apt-get install -y ffmpeg
+                ;;
+        esac
+        success "ffmpeg installed"
+    else
+        info "Skipping ffmpeg"
+    fi
+}
+
+install_ffmpeg
+
 # ─── Step 6: Deep Learning Dev Tools ────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
@@ -686,6 +714,37 @@ case "$OS" in
     macos)      install_dev_tools_macos ;;
     debian|wsl) install_dev_tools_linux ;;
 esac
+
+# Optional Hugging Face downloader (community script)
+install_hfd() {
+    if has_cmd hfd; then
+        success "hfd already installed"
+        return 0
+    fi
+
+    echo ""
+    echo -e "  hfd is a community Hugging Face downloader based on aria2/wget."
+    echo -e "  Source: ${BOLD}https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f${NC}"
+    printf "  Install hfd Hugging Face downloader? (y/N): "
+    read -r INSTALL_HFD
+    if [[ "$INSTALL_HFD" =~ ^[Yy]$ ]]; then
+        info "Installing hfd..."
+        mkdir -p "$HOME/.local/bin"
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} curl -fsSL https://gist.githubusercontent.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f/raw/hfd.sh -o $HOME/.local/bin/hfd"
+            echo -e "${YELLOW}[DRY-RUN]${NC} chmod +x $HOME/.local/bin/hfd"
+        else
+            curl -fsSL "https://gist.githubusercontent.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f/raw/hfd.sh" -o "$HOME/.local/bin/hfd"
+            chmod +x "$HOME/.local/bin/hfd"
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
+        success "hfd installed"
+    else
+        info "Skipping hfd"
+    fi
+}
+
+install_hfd
 
 # ─── Step 7: Starship Prompt ────────────────────────────────────────
 echo ""
@@ -1084,9 +1143,16 @@ echo -e "    📊 btop                 — system monitor"
 echo -e "    🔀 lazygit + delta      — git tools"
 echo -e "    📁 zoxide               — smart cd"
 echo -e "    🔍 fzf                  — fuzzy finder"
+echo -e "    📥 aria2                — fast downloads"
+if has_cmd ffmpeg; then
+    echo -e "    🎞  ffmpeg              — media processing"
+fi
 echo -e "    🧠 uv pipx direnv nvtop — Python/ML dev helpers"
 if has_cmd zellij; then
     echo -e "    🪟 zellij               — terminal multiplexer"
+fi
+if has_cmd hfd; then
+    echo -e "    🤗 hfd                  — Hugging Face downloader"
 fi
 echo ""
 echo -e "  ${YELLOW}Next steps:${NC}"
