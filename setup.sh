@@ -636,13 +636,13 @@ else
             else
                 # Download from GitHub releases (starship.rs installer may fail on some WSL setups)
                 info "Bundled binary not found, downloading from GitHub..."
-                local starship_arch
+                starship_arch=""
                 case "$(uname -m)" in
                     x86_64)  starship_arch="x86_64" ;;
                     aarch64) starship_arch="aarch64" ;;
                     *) error "Unsupported arch for Starship: $(uname -m)" ;;
                 esac
-                local starship_tmp
+                starship_tmp=""
                 starship_tmp="$(mktemp -d)"
                 if $DRY_RUN; then
                     echo -e "${YELLOW}[DRY-RUN]${NC} Download starship from GitHub releases"
@@ -743,14 +743,14 @@ else
                 else
                     # Download binary from GitHub releases (zellij.dev/launch auto-starts zellij, which hangs the script)
                     info "Downloading Zellij from GitHub releases..."
-                    local zellij_arch
+                    zellij_arch=""
                     case "$(uname -m)" in
                         x86_64)  zellij_arch="x86_64" ;;
                         aarch64) zellij_arch="aarch64" ;;
                         *) warn "Unsupported arch for Zellij: $(uname -m)"; return 0 ;;
                     esac
-                    local zellij_url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${zellij_arch}-unknown-linux-musl.tar.gz"
-                    local zellij_tmp
+                    zellij_url="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${zellij_arch}-unknown-linux-musl.tar.gz"
+                    zellij_tmp=""
                     zellij_tmp="$(mktemp -d)"
                     if $DRY_RUN; then
                         echo -e "${YELLOW}[DRY-RUN]${NC} curl -fsSL $zellij_url | tar xz -C $zellij_tmp && sudo cp $zellij_tmp/zellij /usr/local/bin/"
