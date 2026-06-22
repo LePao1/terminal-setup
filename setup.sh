@@ -6,7 +6,7 @@
 #
 # Stack: Ghostty + (Fish or Zsh) + Starship + Nerd Font (MesloLGS)
 # Tools: bat, eza, fd, ripgrep, btop, zoxide, jq, tldr, delta, lazygit, fzf
-# Node:  fnm (Fast Node Manager) — works with both Fish and Zsh
+# Node:  fnm (Fast Node Manager) + pnpm — works with both Fish and Zsh
 # Theme: Catppuccin Mocha (Starship)
 #
 # Usage:
@@ -716,6 +716,29 @@ else
     fi
 fi
 
+# ─── pnpm (default when Node is available) ───────────────────────────
+install_pnpm() {
+    if has_cmd pnpm; then
+        success "pnpm already installed"
+        return 0
+    fi
+
+    if has_cmd corepack; then
+        info "Installing pnpm via Corepack..."
+        run_cmd corepack enable
+        run_cmd corepack prepare pnpm@latest --activate
+        success "pnpm installed"
+    elif has_cmd npm; then
+        info "Installing pnpm via npm..."
+        run_cmd npm install -g pnpm
+        success "pnpm installed"
+    else
+        warn "Node/npm not found — skipping pnpm"
+    fi
+}
+
+install_pnpm
+
 # ─── Step 8: Zellij (optional) ──────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
@@ -981,7 +1004,7 @@ else
 fi
 echo -e "    🚀 Starship             — prompt (Catppuccin Mocha)"
 echo -e "    🔤 MesloLGS NF          — nerd font"
-echo -e "    🟢 fnm                  — Node version manager (fast!)"
+echo -e "    🟢 fnm + pnpm           — Node version/package managers"
 echo -e "    📦 bat eza fd rg        — modern coreutils"
 echo -e "    📊 btop                 — system monitor"
 echo -e "    🔀 lazygit + delta      — git tools"
