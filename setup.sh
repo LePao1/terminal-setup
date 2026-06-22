@@ -915,7 +915,8 @@ else
         run_cmd cp "$CONFIGS_DIR/.zshrc" "$HOME/.zshrc"
 
         # Patch Homebrew paths → Linux paths
-        sed -i 's|export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:\$PATH"|# PATH — system paths on Linux\nexport PATH="$HOME/.local/bin:$PATH"|' "$HOME/.zshrc"
+        sed -i '/# ─── Homebrew/i # ─── Local bin (Linux) ───────────────────────────────────────────────\nexport PATH="$HOME/.local/bin:$PATH"\n' "$HOME/.zshrc"
+        sed -i '/export PATH="\/opt\/homebrew\/bin:\/opt\/homebrew\/sbin:\$PATH"/d' "$HOME/.zshrc"
 
         # Patch zsh plugin source paths
         sed -i 's|/opt/homebrew/share/zsh-syntax-highlighting/|/usr/share/zsh-syntax-highlighting/|g' "$HOME/.zshrc"
