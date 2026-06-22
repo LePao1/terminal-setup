@@ -6,6 +6,7 @@
 #
 # Stack: Ghostty + (Fish or Zsh) + Starship + Nerd Font (MesloLGS)
 # Tools: bat, eza, fd, ripgrep, btop, zoxide, jq, tldr, delta, lazygit, fzf
+# ML/dev: uv, python3-venv, pipx, direnv, nvtop
 # Node:  fnm (Fast Node Manager) + pnpm — works with both Fish and Zsh
 # Theme: Catppuccin Mocha (Starship)
 #
@@ -194,7 +195,7 @@ has_cmd() {
 # ─── Step 1: Package Manager ────────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  📦 Step 1/9: Package Manager${NC}"
+echo -e "${BOLD}  📦 Step 1/10: Package Manager${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 case "$OS" in
@@ -229,7 +230,7 @@ esac
 # ─── Step 2: Terminal Emulator ───────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  👻 Step 2/9: Terminal Emulator${NC}"
+echo -e "${BOLD}  👻 Step 2/10: Terminal Emulator${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 case "$OS" in
@@ -267,7 +268,7 @@ esac
 # ─── Step 3: Nerd Font (MesloLGS NF) ────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  🔤 Step 3/9: Nerd Font (MesloLGS NF)${NC}"
+echo -e "${BOLD}  🔤 Step 3/10: Nerd Font (MesloLGS NF)${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 # Determine font directory based on OS
@@ -321,9 +322,9 @@ fi
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 if [[ "$SHELL_CHOICE" == "fish" ]]; then
-    echo -e "${BOLD}  🐟 Step 4/9: Fish Shell${NC}"
+    echo -e "${BOLD}  🐟 Step 4/10: Fish Shell${NC}"
 else
-    echo -e "${BOLD}  🐚 Step 4/9: Zsh + Fish-like Plugins${NC}"
+    echo -e "${BOLD}  🐚 Step 4/10: Zsh + Fish-like Plugins${NC}"
 fi
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
@@ -464,7 +465,7 @@ esac
 # ─── Step 5: CLI Tools ──────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  🛠  Step 5/9: CLI Tools${NC}"
+echo -e "${BOLD}  🛠  Step 5/10: CLI Tools${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 install_cli_tools_macos() {
@@ -613,10 +614,83 @@ case "$OS" in
     debian|wsl) install_cli_tools_linux ;;
 esac
 
-# ─── Step 6: Starship Prompt ────────────────────────────────────────
+# ─── Step 6: Deep Learning Dev Tools ────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  🚀 Step 6/9: Starship Prompt${NC}"
+echo -e "${BOLD}  🧠 Step 6/10: Deep Learning Dev Tools${NC}"
+echo -e "${BOLD}══════════════════════════════════════════${NC}"
+
+install_dev_tools_macos() {
+    local TOOLS=(uv python pipx direnv)
+    for tool in "${TOOLS[@]}"; do
+        if brew list "$tool" &>/dev/null; then
+            success "$tool already installed"
+        else
+            info "Installing $tool..."
+            run_cmd brew install "$tool"
+            success "$tool installed"
+        fi
+    done
+
+    if brew info nvtop &>/dev/null; then
+        if brew list nvtop &>/dev/null; then
+            success "nvtop already installed"
+        else
+            info "Installing nvtop..."
+            run_cmd brew install nvtop
+            success "nvtop installed"
+        fi
+    else
+        warn "nvtop is not available via Homebrew on this system — skipping"
+    fi
+}
+
+install_dev_tools_linux() {
+    local APT_TOOLS=(python3 python3-venv python3-pip pipx direnv)
+    for tool in "${APT_TOOLS[@]}"; do
+        if dpkg -s "$tool" &>/dev/null 2>&1; then
+            success "$tool already installed"
+        else
+            info "Installing $tool..."
+            run_cmd sudo apt-get install -y "$tool"
+            success "$tool installed"
+        fi
+    done
+
+    if has_cmd uv; then
+        success "uv already installed"
+    else
+        info "Installing uv..."
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} curl -LsSf https://astral.sh/uv/install.sh | sh"
+        else
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
+        success "uv installed"
+    fi
+
+    if has_cmd nvtop; then
+        success "nvtop already installed"
+    else
+        info "Installing nvtop..."
+        if run_cmd sudo apt-get install -y nvtop 2>/dev/null; then
+            success "nvtop installed"
+        else
+            warn "nvtop is not available via apt on this Ubuntu/Debian release — skipping"
+        fi
+    fi
+}
+
+case "$OS" in
+    macos)      install_dev_tools_macos ;;
+    debian|wsl) install_dev_tools_linux ;;
+esac
+
+# ─── Step 7: Starship Prompt ────────────────────────────────────────
+echo ""
+echo -e "${BOLD}══════════════════════════════════════════${NC}"
+echo -e "${BOLD}  🚀 Step 7/10: Starship Prompt${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 if has_cmd starship; then
@@ -659,10 +733,10 @@ else
     success "Starship installed"
 fi
 
-# ─── Step 7: fnm + Node.js (optional) ───────────────────────────────
+# ─── Step 8: fnm + Node.js (optional) ───────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  🟢 Step 7/9: fnm + Node.js (optional)${NC}"
+echo -e "${BOLD}  🟢 Step 8/10: fnm + Node.js (optional)${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 if has_cmd fnm; then
@@ -739,10 +813,10 @@ install_pnpm() {
 
 install_pnpm
 
-# ─── Step 8: Zellij (optional) ──────────────────────────────────────
+# ─── Step 9: Zellij (optional) ──────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  🪟 Step 8/9: Zellij (optional)${NC}"
+echo -e "${BOLD}  🪟 Step 9/10: Zellij (optional)${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 if has_cmd zellij; then
@@ -792,10 +866,10 @@ else
     fi
 fi
 
-# ─── Step 9: Config Files ───────────────────────────────────────────
+# ─── Step 10: Config Files ──────────────────────────────────────────
 echo ""
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
-echo -e "${BOLD}  📦 Step 9/9: Deploying Configs${NC}"
+echo -e "${BOLD}  📦 Step 10/10: Deploying Configs${NC}"
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
 # --- Ghostty config ---
@@ -1010,6 +1084,7 @@ echo -e "    📊 btop                 — system monitor"
 echo -e "    🔀 lazygit + delta      — git tools"
 echo -e "    📁 zoxide               — smart cd"
 echo -e "    🔍 fzf                  — fuzzy finder"
+echo -e "    🧠 uv pipx direnv nvtop — Python/ML dev helpers"
 if has_cmd zellij; then
     echo -e "    🪟 zellij               — terminal multiplexer"
 fi

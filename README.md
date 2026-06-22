@@ -104,6 +104,12 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[delta](https://github.com/dandavison/delta)** | Beautiful git diffs with syntax highlighting |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git TUI |
 | **[fnm](https://github.com/Schniz/fnm)** | Fast Node Manager (Rust) |
+| **[pnpm](https://pnpm.io)** | Fast, disk-efficient Node package manager |
+| **[uv](https://docs.astral.sh/uv/)** | Fast Python package/project manager |
+| **python3-venv** | Standard Python virtual environment support |
+| **[pipx](https://pipx.pypa.io)** | Isolated installer for Python CLI tools |
+| **[direnv](https://direnv.net)** | Per-project environment variables |
+| **[nvtop](https://github.com/Syllo/nvtop)** | GPU process monitor for ML workloads |
 | **[Zellij](https://zellij.dev)** | Modern terminal multiplexer (optional) |
 
 ## What It Does
@@ -113,10 +119,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 3. Downloads **MesloLGS NF** nerd fonts
 4. Installs your **shell** of choice + plugins
 5. Installs all **CLI tools** (Homebrew on macOS, apt + GitHub releases on Linux)
-6. Installs **Starship** prompt with Catppuccin Mocha config
-7. Installs **fnm** + **Node.js** LTS (optional)
-8. Installs **Zellij** terminal multiplexer (optional)
-9. Deploys all config files (existing configs are backed up with timestamps)
+6. Installs **Python / ML dev helpers** (`uv`, `python3-venv`, `pipx`, `direnv`, `nvtop`)
+7. Installs **Starship** prompt with Catppuccin Mocha config
+8. Installs **fnm** + **Node.js** LTS (optional), then installs **pnpm** when Node is available
+9. Installs **Zellij** terminal multiplexer (optional)
+10. Deploys all config files (existing configs are backed up with timestamps)
 
 ## Platform Notes
 
@@ -166,6 +173,25 @@ fnm install --lts         # Install latest LTS
 fnm default 22            # Set default version
 fnm use 22                # Switch in current shell
 echo "22" > .node-version # Auto-switch when entering this directory
+```
+
+## Python / ML Dev Tools
+
+```bash
+uv venv                         # Create .venv
+source .venv/bin/activate       # Activate project env
+uv pip install torch numpy      # Install Python packages
+pipx install ruff               # Install isolated Python CLI tools
+direnv allow                    # Trust this project's .envrc
+nvtop                           # Monitor GPU usage/processes
+```
+
+Example `.envrc` for a deep learning project:
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0
+export HF_HOME=/data/hf-cache
 ```
 
 ## SSH Key Switcher

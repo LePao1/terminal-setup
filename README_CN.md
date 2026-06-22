@@ -25,9 +25,9 @@
 | 🍎 **macOS** | ✅ 主力平台 — 长期使用验证 | Homebrew |
 | 🐧 **Debian / Ubuntu** | 🧪 实验性 — 可用但未经长期测试 | apt + 内置二进制 |
 | 🪟 **Windows (WSL)** | 🧪 实验性 — 可用但未经长期测试 | apt（WSL 内部） |
+| 🪟 **Windows (原生)** | ⛔ 不支持 | 请先安装 WSL |
 
 > **注意：** 本脚本主要在 macOS 上开发和测试。Linux（Debian/Ubuntu）和 WSL 支持已添加且可用，但尚未经过长期使用测试。欢迎提 Issue 和 PR！
-| 🪟 **Windows (原生)** | ⛔ 不支持 | 请先安装 WSL |
 
 ## 快速开始
 
@@ -104,6 +104,12 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[delta](https://github.com/dandavison/delta)** | 带语法高亮的 git diff |
 | **[lazygit](https://github.com/jesseduffield/lazygit)** | Git 终端 UI |
 | **[fnm](https://github.com/Schniz/fnm)** | 快速 Node 版本管理器（Rust 编写） |
+| **[pnpm](https://pnpm.io)** | 快速、省磁盘空间的 Node 包管理器 |
+| **[uv](https://docs.astral.sh/uv/)** | 快速 Python 包/项目管理器 |
+| **python3-venv** | Python 官方虚拟环境支持 |
+| **[pipx](https://pipx.pypa.io)** | 隔离安装 Python 命令行工具 |
+| **[direnv](https://direnv.net)** | 按项目自动加载环境变量 |
+| **[nvtop](https://github.com/Syllo/nvtop)** | GPU 进程监控，适合机器学习/深度学习 |
 | **[Zellij](https://zellij.dev)** | 现代终端复用器（可选） |
 
 ## 脚本做了什么
@@ -113,10 +119,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 3. 下载 **MesloLGS NF** Nerd 字体
 4. 安装你选择的 **Shell** + 插件
 5. 安装所有 **CLI 工具**（macOS 用 Homebrew，Linux 用 apt + GitHub releases）
-6. 安装 **Starship** 提示符 + Catppuccin Mocha 配置
-7. 安装 **fnm** + **Node.js** LTS（可选）
-8. 安装 **Zellij** 终端复用器（可选）
-9. 部署所有配置文件（已有配置会加时间戳备份）
+6. 安装 **Python / 深度学习开发辅助工具**（`uv`、`python3-venv`、`pipx`、`direnv`、`nvtop`）
+7. 安装 **Starship** 提示符 + Catppuccin Mocha 配置
+8. 安装 **fnm** + **Node.js** LTS（可选），如果有 Node 会继续安装 **pnpm**
+9. 安装 **Zellij** 终端复用器（可选）
+10. 部署所有配置文件（已有配置会加时间戳备份）
 
 ## 平台说明
 
@@ -166,6 +173,25 @@ fnm install --lts         # 安装最新 LTS
 fnm default 22            # 设置默认版本
 fnm use 22                # 当前 shell 切换
 echo "22" > .node-version # 进入目录自动切换
+```
+
+## Python / 深度学习开发工具
+
+```bash
+uv venv                         # 创建 .venv
+source .venv/bin/activate       # 激活项目虚拟环境
+uv pip install torch numpy      # 安装 Python 包
+pipx install ruff               # 隔离安装 Python CLI 工具
+direnv allow                    # 信任当前项目的 .envrc
+nvtop                           # 查看 GPU 使用率和进程
+```
+
+深度学习项目里的 `.envrc` 示例：
+
+```bash
+source .venv/bin/activate
+export CUDA_VISIBLE_DEVICES=0
+export HF_HOME=/data/hf-cache
 ```
 
 ## SSH Key 切换
