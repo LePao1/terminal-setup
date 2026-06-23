@@ -204,6 +204,16 @@ mamba install numpy pandas scikit-learn
 
 Miniforge 安装后会设置 `auto_activate_base false`，所以新终端不会自动进入 `base` 环境。
 
+国内网络可以选择启用镜像加速：pip/uv 使用清华 TUNA PyPI 镜像，conda 使用中科大 USTC 的 Miniforge/Mamba 推荐配置。脚本会部署：
+
+```text
+~/.config/pip/pip.conf
+~/.config/uv/uv.toml
+~/.condarc
+```
+
+对应模板在 `configs/pip.conf`、`configs/uv.toml`、`configs/.condarc`。已有配置会自动备份后再覆盖。
+
 深度学习项目里的 `.envrc` 示例：
 
 ```bash

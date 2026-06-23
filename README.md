@@ -204,6 +204,16 @@ mamba install numpy pandas scikit-learn
 
 Miniforge is installed with `auto_activate_base false`, so new shells do not automatically enter the `base` environment.
 
+For users in China, the setup script can optionally configure mirrors: Tsinghua TUNA for pip/uv PyPI packages, and the USTC Miniforge/Mamba-recommended conda mirror.
+
+```text
+~/.config/pip/pip.conf
+~/.config/uv/uv.toml
+~/.condarc
+```
+
+Templates are stored in `configs/pip.conf`, `configs/uv.toml`, and `configs/.condarc`. Existing files are backed up before they are replaced.
+
 Example `.envrc` for a deep learning project:
 
 ```bash

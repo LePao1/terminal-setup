@@ -814,6 +814,52 @@ case "$OS" in
     debian|wsl) install_dev_tools_linux ;;
 esac
 
+configure_python_package_mirrors() {
+    echo ""
+    echo -e "  Use China mirrors for pip, uv, and conda?"
+    echo -e "  PyPI mirror:  ${BOLD}https://mirrors.tuna.tsinghua.edu.cn${NC}"
+    echo -e "  Conda mirror: ${BOLD}https://mirrors.ustc.edu.cn${NC}"
+    printf "  Configure Python/Conda mirrors? (y/N): "
+    read -r CONFIGURE_PYTHON_MIRRORS
+    if [[ ! "$CONFIGURE_PYTHON_MIRRORS" =~ ^[Yy]$ ]]; then
+        info "Keeping existing Python/Conda mirror settings"
+        return 0
+    fi
+
+    local timestamp
+    timestamp="$(date +%s)"
+
+    deploy_user_config() {
+        local src="$1"
+        local dest="$2"
+        local dest_dir
+        dest_dir="$(dirname "$dest")"
+
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} mkdir -p $dest_dir"
+            if [[ -f "$dest" ]]; then
+                echo -e "${YELLOW}[DRY-RUN]${NC} cp $dest $dest.bak.$timestamp"
+            fi
+            echo -e "${YELLOW}[DRY-RUN]${NC} cp $src $dest"
+            return 0
+        fi
+
+        mkdir -p "$dest_dir"
+        if [[ -f "$dest" ]]; then
+            cp "$dest" "$dest.bak.$timestamp"
+            warn "Backed up existing $dest"
+        fi
+        cp "$src" "$dest"
+    }
+
+    deploy_user_config "$CONFIGS_DIR/pip.conf" "$HOME/.config/pip/pip.conf"
+    deploy_user_config "$CONFIGS_DIR/uv.toml" "$HOME/.config/uv/uv.toml"
+    deploy_user_config "$CONFIGS_DIR/.condarc" "$HOME/.condarc"
+    success "Mirrors configured for pip, uv, and conda"
+}
+
+configure_python_package_mirrors
+
 install_miniforge() {
     if has_cmd conda || [[ -x "$HOME/miniforge3/bin/conda" ]]; then
         success "Miniforge/conda already installed"
@@ -873,6 +919,7 @@ install_miniforge
 
 configure_miniforge_shell() {
     local conda_bin=""
+    local mamba_bin=""
 
     if [[ -x "$HOME/miniforge3/bin/conda" ]]; then
         conda_bin="$HOME/miniforge3/bin/conda"
@@ -889,6 +936,50 @@ configure_miniforge_shell() {
         "$conda_bin" init "$SHELL_CHOICE"
     fi
     success "Conda shell integration configured"
+
+    if [[ -x "$HOME/miniforge3/bin/mamba" ]]; then
+        mamba_bin="$HOME/miniforge3/bin/mamba"
+    elif has_cmd mamba; then
+        mamba_bin="$(command -v mamba)"
+    else
+        return 0
+    fi
+
+    info "Configuring mamba activate/deactivate for $SHELL_CHOICE..."
+    if [[ "$SHELL_CHOICE" == "zsh" ]]; then
+        if grep -qF 'mamba shell hook --shell zsh' "$HOME/.zshrc" 2>/dev/null; then
+            success "Mamba shell integration already present"
+            return 0
+        fi
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} append mamba shell hook to $HOME/.zshrc"
+        else
+            cat >> "$HOME/.zshrc" << MAMBAZSH
+
+# >>> mamba initialize >>>
+eval "\$($mamba_bin shell hook --shell zsh --root-prefix "$HOME/miniforge3")"
+# <<< mamba initialize <<<
+MAMBAZSH
+        fi
+        success "Mamba shell integration configured"
+    elif [[ "$SHELL_CHOICE" == "fish" ]]; then
+        local fish_config="$HOME/.config/fish/config.fish"
+        if grep -qF 'mamba shell hook --shell fish' "$fish_config" 2>/dev/null; then
+            success "Mamba shell integration already present"
+            return 0
+        fi
+        if $DRY_RUN; then
+            echo -e "${YELLOW}[DRY-RUN]${NC} append mamba shell hook to $fish_config"
+        else
+            cat >> "$fish_config" << MAMBAFISH
+
+# >>> mamba initialize >>>
+$mamba_bin shell hook --shell fish --root-prefix "$HOME/miniforge3" | source
+# <<< mamba initialize <<<
+MAMBAFISH
+        fi
+        success "Mamba shell integration configured"
+    fi
 }
 
 # Optional Hugging Face downloader (community script)
