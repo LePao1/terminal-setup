@@ -112,6 +112,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[pipx](https://pipx.pypa.io)** | 隔离安装 Python 命令行工具 |
 | **[direnv](https://direnv.net)** | 按项目自动加载环境变量 |
 | **[nvtop](https://github.com/Syllo/nvtop)** | GPU 进程监控，适合机器学习/深度学习 |
+| **[Miniforge](https://github.com/conda-forge/miniforge)** | 科学计算/机器学习常用的 conda/mamba 环境（可选） |
 | **[hfd](https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f)** | Hugging Face 下载器（可选，社区脚本） |
 | **[Zellij](https://zellij.dev)** | 现代终端复用器（可选） |
 
@@ -122,7 +123,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 3. 下载 **MesloLGS NF** Nerd 字体
 4. 安装你选择的 **Shell** + 插件
 5. 安装所有 **CLI 工具**（macOS 用 Homebrew，Linux 用 apt + GitHub releases）
-6. 安装 **Python / 深度学习开发辅助工具**（`uv`、`python3-venv`、`pipx`、`direnv`、`nvtop`），并可选安装 **hfd**
+6. 安装 **Python / 深度学习开发辅助工具**（`uv`、`python3-venv`、`pipx`、`direnv`、`nvtop`），并可选安装 **Miniforge** / **hfd**
 7. 安装 **Starship** 提示符 + Catppuccin Mocha 配置
 8. 安装 **fnm** + **Node.js** LTS（可选），如果有 Node 会继续安装 **pnpm**
 9. 安装 **Zellij** 终端复用器（可选）
@@ -192,6 +193,16 @@ direnv allow                    # 信任当前项目的 .envrc
 nvtop                           # 查看 GPU 使用率和进程
 hfd Qwen/Qwen2.5-7B-Instruct --local-dir models/qwen2.5-7b -x 16
 ```
+
+可选的 Miniforge 用法：
+
+```bash
+conda create -n llm python=3.11
+conda activate llm
+mamba install numpy pandas scikit-learn
+```
+
+Miniforge 安装后会设置 `auto_activate_base false`，所以新终端不会自动进入 `base` 环境。
 
 深度学习项目里的 `.envrc` 示例：
 

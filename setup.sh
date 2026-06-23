@@ -814,6 +814,83 @@ case "$OS" in
     debian|wsl) install_dev_tools_linux ;;
 esac
 
+install_miniforge() {
+    if has_cmd conda || [[ -x "$HOME/miniforge3/bin/conda" ]]; then
+        success "Miniforge/conda already installed"
+        if [[ -x "$HOME/miniforge3/bin/conda" ]]; then
+            run_cmd "$HOME/miniforge3/bin/conda" config --set auto_activate_base false
+        fi
+        return 0
+    fi
+
+    echo ""
+    echo -e "  Miniforge provides conda/mamba environments for scientific Python and ML."
+    echo -e "  It will be installed to ${BOLD}$HOME/miniforge3${NC} with base auto-activation disabled."
+    printf "  Install Miniforge? (y/N): "
+    read -r INSTALL_MINIFORGE
+    if [[ ! "$INSTALL_MINIFORGE" =~ ^[Yy]$ ]]; then
+        info "Skipping Miniforge"
+        return 0
+    fi
+
+    local miniforge_arch
+    miniforge_arch="$(uname -m)"
+    case "$miniforge_arch" in
+        x86_64|aarch64|arm64) ;;
+        *)
+            warn "Unsupported architecture for Miniforge: $miniforge_arch"
+            return 0
+            ;;
+    esac
+
+    local miniforge_os
+    case "$OS" in
+        macos) miniforge_os="MacOSX" ;;
+        debian|wsl) miniforge_os="Linux" ;;
+        *) warn "Unsupported OS for Miniforge: $OS"; return 0 ;;
+    esac
+
+    local installer="Miniforge3-${miniforge_os}-${miniforge_arch}.sh"
+    local url="https://github.com/conda-forge/miniforge/releases/latest/download/$installer"
+    local tmp_dir=""
+    tmp_dir="$(mktemp -d)"
+
+    info "Installing Miniforge..."
+    if $DRY_RUN; then
+        echo -e "${YELLOW}[DRY-RUN]${NC} curl -fsSL $url -o $tmp_dir/$installer"
+        echo -e "${YELLOW}[DRY-RUN]${NC} bash $tmp_dir/$installer -b -p $HOME/miniforge3"
+        echo -e "${YELLOW}[DRY-RUN]${NC} $HOME/miniforge3/bin/conda config --set auto_activate_base false"
+    else
+        curl -fsSL "$url" -o "$tmp_dir/$installer"
+        bash "$tmp_dir/$installer" -b -p "$HOME/miniforge3"
+        "$HOME/miniforge3/bin/conda" config --set auto_activate_base false
+        rm -rf "$tmp_dir"
+    fi
+    success "Miniforge installed with base auto-activation disabled"
+}
+
+install_miniforge
+
+configure_miniforge_shell() {
+    local conda_bin=""
+
+    if [[ -x "$HOME/miniforge3/bin/conda" ]]; then
+        conda_bin="$HOME/miniforge3/bin/conda"
+    elif has_cmd conda; then
+        conda_bin="$(command -v conda)"
+    else
+        return 0
+    fi
+
+    info "Configuring conda for $SHELL_CHOICE..."
+    if $DRY_RUN; then
+        echo -e "${YELLOW}[DRY-RUN]${NC} $conda_bin init $SHELL_CHOICE"
+    else
+        "$conda_bin" init "$SHELL_CHOICE"
+    fi
+    success "Conda shell integration configured"
+}
+
 # Optional Hugging Face downloader (community script)
 install_hfd() {
     if has_cmd hfd; then
@@ -1189,6 +1266,8 @@ else
     success "Zsh config deployed"
 fi
 
+configure_miniforge_shell
+
 # ─── Git config for delta ────────────────────────────────────────────
 if has_cmd delta || $DRY_RUN; then
     info "Configuring git-delta as git pager..."
@@ -1247,6 +1326,9 @@ if has_cmd ffmpeg; then
     echo -e "    🎞  ffmpeg              — media processing"
 fi
 echo -e "    🧠 uv pipx direnv nvtop — Python/ML dev helpers"
+if has_cmd conda || [[ -x "$HOME/miniforge3/bin/conda" ]]; then
+    echo -e "    🐍 Miniforge            — conda/mamba environments"
+fi
 if has_cmd zellij; then
     echo -e "    🪟 zellij               — terminal multiplexer"
 fi

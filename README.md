@@ -112,6 +112,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 | **[pipx](https://pipx.pypa.io)** | Isolated installer for Python CLI tools |
 | **[direnv](https://direnv.net)** | Per-project environment variables |
 | **[nvtop](https://github.com/Syllo/nvtop)** | GPU process monitor for ML workloads |
+| **[Miniforge](https://github.com/conda-forge/miniforge)** | Conda/mamba environments for scientific Python and ML (optional) |
 | **[hfd](https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f)** | Hugging Face downloader (optional, community script) |
 | **[Zellij](https://zellij.dev)** | Modern terminal multiplexer (optional) |
 
@@ -122,7 +123,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 3. Downloads **MesloLGS NF** nerd fonts
 4. Installs your **shell** of choice + plugins
 5. Installs all **CLI tools** (Homebrew on macOS, apt + GitHub releases on Linux)
-6. Installs **Python / ML dev helpers** (`uv`, `python3-venv`, `pipx`, `direnv`, `nvtop`) and optionally **hfd**
+6. Installs **Python / ML dev helpers** (`uv`, `python3-venv`, `pipx`, `direnv`, `nvtop`) and optionally **Miniforge** / **hfd**
 7. Installs **Starship** prompt with Catppuccin Mocha config
 8. Installs **fnm** + **Node.js** LTS (optional), then installs **pnpm** when Node is available
 9. Installs **Zellij** terminal multiplexer (optional)
@@ -192,6 +193,16 @@ direnv allow                    # Trust this project's .envrc
 nvtop                           # Monitor GPU usage/processes
 hfd Qwen/Qwen2.5-7B-Instruct --local-dir models/qwen2.5-7b -x 16
 ```
+
+Optional Miniforge usage:
+
+```bash
+conda create -n llm python=3.11
+conda activate llm
+mamba install numpy pandas scikit-learn
+```
+
+Miniforge is installed with `auto_activate_base false`, so new shells do not automatically enter the `base` environment.
 
 Example `.envrc` for a deep learning project:
 
