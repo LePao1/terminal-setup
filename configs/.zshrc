@@ -1,41 +1,41 @@
 #!/bin/zsh
 # ─── terminal-setup: Zsh config ─────────────────────────────────────
-# Powered by: Starship + zsh-autosuggestions + zsh-syntax-highlighting + fzf + fnm
+# Powered by: Oh My Zsh + Starship + zsh-autosuggestions
+#             + zsh-syntax-highlighting + fzf + zoxide + fnm
 
-# ─── Homebrew ────────────────────────────────────────────────────────
-if [[ -d /opt/homebrew ]]; then
-    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
-    BREW_PREFIX="/opt/homebrew"
-elif [[ -d /usr/local/Cellar ]]; then
-    export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
-    BREW_PREFIX="/usr/local"
-else
-    BREW_PREFIX=""
+# ─── Local bin ───────────────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
+
+# ─── Oh My Zsh ───────────────────────────────────────────────────────
+export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
+
+# Starship draws the prompt; OMZ must not install a theme of its own.
+ZSH_THEME=""
+
+# Load order matters: zsh-syntax-highlighting must stay last so the
+# widgets registered by the other plugins are still highlighted.
+plugins=(
+    git
+    sudo
+    extract
+    fzf
+    zoxide
+    fnm
+    direnv
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+)
+
+# Keep startup snappy; bump by hand with 'omz update'.
+DISABLE_AUTO_UPDATE=true
+DISABLE_UPDATE_PROMPT=true
+
+source "$ZSH/oh-my-zsh.sh"
+
+# ─── Starship prompt ─────────────────────────────────────────────────
+if command -v starship &>/dev/null; then
+    eval "$(starship init zsh)"
 fi
-
-# ─── Starship prompt ────────────────────────────────────────────────
-eval "$(starship init zsh)"
-
-# ─── Zsh plugins (via Homebrew) ──────────────────────────────────────
-# Autosuggestions (fish-like suggestions)
-if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-fi
-
-# Completions
-if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/share/zsh-completions" ]]; then
-    fpath=("$BREW_PREFIX/share/zsh-completions" $fpath)
-elif [[ -d /usr/share/zsh-completions ]]; then
-    fpath=(/usr/share/zsh-completions $fpath)
-fi
-autoload -Uz compinit && compinit
-
-# Substring + case-insensitive completion
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=*'
 
 # ─── History ─────────────────────────────────────────────────────────
 HISTSIZE=50000
@@ -48,6 +48,10 @@ setopt HIST_IGNORE_SPACE
 setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
 
+# ─── Completion tweaks on top of OMZ defaults ────────────────────────
+# Case-insensitive substring matching.
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=*'
+
 # ─── History prefix search (↑/↓) ─────────────────────────────────────
 # up-line-or-beginning-search: cursor stays at prefix position,
 # matched tail shown as gray autosuggestion — type more to narrow.
@@ -58,11 +62,6 @@ bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
 
 # ─── fzf ─────────────────────────────────────────────────────────────
-if [[ -f ~/.fzf.zsh ]]; then
-    source ~/.fzf.zsh
-elif command -v fzf &>/dev/null; then
-    eval "$(fzf --zsh 2>/dev/null)"
-fi
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 # Use fd for fzf if available (Debian/Ubuntu ship it as 'fdfind')
 if command -v fd &>/dev/null; then
@@ -76,18 +75,8 @@ if [[ -n "${FZF_FINDER:-}" ]]; then
     export FZF_ALT_C_COMMAND="$FZF_FINDER --type d --hidden --follow --exclude .git"
 fi
 
-# ─── Zoxide (smart cd) ──────────────────────────────────────────────
-eval "$(zoxide init zsh)"
-
-# ─── direnv (per-project env) ───────────────────────────────────────
-if command -v direnv &>/dev/null; then
-    eval "$(direnv hook zsh)"
-fi
-
-# ─── fnm (Node version manager) ─────────────────────────────────────
-if command -v fnm &>/dev/null; then
-    eval "$(fnm env --use-on-cd --shell zsh)"
-fi
+# fnm binary path (Linux installs to ~/.local/share/fnm)
+export PATH="$HOME/.local/share/fnm:$PATH"
 
 # ─── SSH key switcher (fallback for multi-account setups) ────────────
 # Usage: set-ssh-key lewis-official-20260224
@@ -114,17 +103,12 @@ alias lt='eza --tree --icons --level=2'
 alias lg='lazygit'
 
 # ─── pnpm ────────────────────────────────────────────────────────────
-export PNPM_HOME="$HOME/Library/pnpm"
+if [[ "$(uname)" == "Darwin" ]]; then
+    export PNPM_HOME="$HOME/Library/pnpm"
+else
+    export PNPM_HOME="$HOME/.local/share/pnpm"
+fi
 case ":$PATH:" in
     *":$PNPM_HOME:"*) ;;
     *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-
-# ─── zsh-syntax-highlighting ──────────────────────────────────────────
-# Load this at the very end of .zshrc so widgets created by compinit,
-# zle -N, and other plugins are included in syntax highlighting.
-if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-    source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-fi

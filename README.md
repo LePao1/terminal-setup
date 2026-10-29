@@ -271,20 +271,32 @@ Different people have different needs:
 If you're primarily a user/developer who runs other people's scripts → **Zsh**.
 If you want the cleanest shell experience and don't mind the occasional `bash script.sh` → **Fish**.
 
-### Why Homebrew for Zsh plugins? Why not zinit/antidote/sheldon?
+### Why Oh My Zsh instead of zinit/antidote/sheldon?
 
-We only install 3 Zsh plugins: `zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`.
+We ship **Oh My Zsh as a plugin bundle**, but disable its theme, auto-update and
+prompt so it stays lean:
 
-For 3 plugins, a plugin manager is overkill:
+- **Bundled plugins:** `zsh-autosuggestions`, `zsh-syntax-highlighting`, `fzf`,
+  `zoxide`, `fnm`, `direnv`, `git`, `sudo` and `extract` all ship with OMZ —
+  no separate `brew`/`apt` packages, no extra plugin manager.
+- **Theme off (`ZSH_THEME=""`):** Starship still draws the prompt.
+- **Auto-update off:** avoids a network check on every shell start; run
+  `omz update` when you want to bump it.
+- **Measured startup:** ~0.8s warm, of which `compinit` dominates. That is the
+  honest cost of the framework.
 
-- **zinit:** Original author abandoned it. Community fork (zdharma-continuum) exists but adds complexity for no gain at this scale. Turbo mode and ice modifiers are powerful but unnecessary here.
-- **antidote/sheldon:** Good tools, but still an extra layer. More things that can break.
-- **Oh My Zsh:** Framework, not a plugin manager. Loads 100+ files on startup. Slow.
-- **Homebrew:** Already installed, `brew install` + one `source` line in `.zshrc`. Updates via `brew upgrade`. Zero extra dependencies. Done.
+- **zinit:** Original author abandoned it. The community fork
+  (zdharma-continuum) adds complexity without benefit at this scale.
+- **antidote/sheldon:** Good tools, but another layer of configuration to
+  maintain and one more thing that can break.
 
-**Rule of thumb:** If you have <5 plugins, Homebrew direct install. If you have 10+, consider antidote or sheldon.
+**Rule of thumb:** if you already need five or more plugins, a framework that
+ships them (OMZ) beats hand-wiring each one. Below that, direct `apt`/`brew`
+packages are simpler.
 
-> **On Linux:** Zsh plugins install via apt (`zsh-autosuggestions`, `zsh-syntax-highlighting` packages) or git clone as fallback.
+> **On Linux and macOS:** OMZ is installed with `git clone --depth=1` into
+> `~/.oh-my-zsh`. `setup.sh` skips the upstream installer on purpose — it would
+> overwrite `~/.zshrc`, which `setup.sh` deploys separately with a backup.
 
 ### Why fnm over nvm?
 

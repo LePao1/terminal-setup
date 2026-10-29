@@ -270,18 +270,28 @@ GPU 加速、原生 macOS 应用、启动快、配置格式干净。iTerm2 做�
 如果你经常需要跑别人的脚本 → **Zsh**。
 如果你追求最干净的 Shell 体验，不介意偶尔 `bash script.sh` → **Fish**。
 
-### 为什么 Zsh 插件用 Homebrew 装？不用 zinit/antidote/sheldon？
+### 为什么用 Oh My Zsh，而不是 zinit/antidote/sheldon？
 
-总共只有 3 个 Zsh 插件：`zsh-autosuggestions`、`zsh-syntax-highlighting`、`zsh-completions`。
+我们用 **Oh My Zsh 作为插件集合**，但关掉了它的主题、自动更新和 prompt，保持轻量：
 
-3 个插件用插件管理器是杀鸡用牛刀：
+- **自带插件：** `zsh-autosuggestions`、`zsh-syntax-highlighting`、`fzf`、
+  `zoxide`、`fnm`、`direnv`、`git`、`sudo`、`extract` 全部随 OMZ 提供，
+  不需要额外的 `brew`/`apt` 包，也不需要装第二个插件管理器。
+- **关主题（`ZSH_THEME=""`）：** prompt 仍由 Starship 绘制。
+- **关自动更新：** 避免每次启动都联网检查；想升级时手动跑 `omz update`。
+- **实测启动耗时：** 热启动约 0.8 秒，其中 `compinit` 占大头。这是框架的
+  真实代价，不藏着。
 
-- **zinit：** 原作者弃坑了。社区 fork（zdharma-continuum）在维护，但加了一层复杂度却没有任何收益。
-- **antidote/sheldon：** 好工具，但还是多了一层。
-- **Oh My Zsh：** 是框架不是插件管理器。启动时加载 100+ 文件，慢。
-- **Homebrew：** 本来就装了，`brew install` + `.zshrc` 里一行 `source`。零额外依赖。
+- **zinit：** 原作者弃坑。社区 fork（zdharma-continuum）在维护，但在当前
+  规模下只是多一层复杂度，没有收益。
+- **antidote/sheldon：** 好工具，但又是一层需要维护的配置，也多一个可能坏掉的地方。
 
-> **Linux 上：** Zsh 插件通过 apt（`zsh-autosuggestions`、`zsh-syntax-highlighting`）或 git clone 安装。
+**经验法则：** 如果你本来就需要 5 个以上插件，直接用自带插件的框架（OMZ）
+比手工逐个接更划算；低于这个数量，`apt`/`brew` 直接装包更简单。
+
+> **Linux 和 macOS 上：** OMZ 通过 `git clone --depth=1` 装到 `~/.oh-my-zsh`。
+> `setup.sh` 故意不跑上游安装脚本——它会覆盖 `~/.zshrc`，而 `~/.zshrc`
+> 由 `setup.sh` 单独部署并先做备份。
 
 ### 为什么选 fnm 而不是 nvm？
 

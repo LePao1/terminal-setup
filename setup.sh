@@ -427,6 +427,18 @@ else
 fi
 echo -e "${BOLD}══════════════════════════════════════════${NC}"
 
+install_oh_my_zsh() {
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+        success "Oh My Zsh already installed"
+        return 0
+    fi
+    info "Installing Oh My Zsh..."
+    # Clone directly instead of running the installer: the installer would
+    # overwrite ~/.zshrc, which setup.sh deploys separately with a backup.
+    run_cmd git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
+    success "Oh My Zsh installed"
+}
+
 install_shell_macos() {
     if [[ "$SHELL_CHOICE" == "fish" ]]; then
         if ! has_cmd fish; then
@@ -451,17 +463,8 @@ install_shell_macos() {
             success "Fish is already the default shell"
         fi
     else
-        # Zsh is pre-installed on macOS, just install the plugins
-        local plugins=(zsh-autosuggestions zsh-syntax-highlighting zsh-completions)
-        for plugin in "${plugins[@]}"; do
-            if brew list "$plugin" &>/dev/null; then
-                success "$plugin already installed"
-            else
-                info "Installing $plugin..."
-                run_cmd brew install "$plugin"
-                success "$plugin installed"
-            fi
-        done
+        # Zsh is pre-installed on macOS; OMZ ships the plugins we use.
+        install_oh_my_zsh
 
         ZSH_PATH="$(which zsh)"
         if [[ "$SHELL" != "$ZSH_PATH" ]]; then
@@ -513,37 +516,9 @@ install_shell_linux() {
             success "Zsh already installed"
         fi
 
-        # Install Zsh plugins from apt or git clone
-        local ZSH_PLUGINS_DIR="/usr/share"
-        local need_clone=false
-
-        # zsh-autosuggestions
-        if [[ -f "$ZSH_PLUGINS_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-            success "zsh-autosuggestions already installed"
-        elif dpkg -s zsh-autosuggestions &>/dev/null 2>&1; then
-            success "zsh-autosuggestions already installed"
-        else
-            info "Installing zsh-autosuggestions..."
-            run_cmd sudo apt-get install -y zsh-autosuggestions 2>/dev/null || {
-                info "apt package not available, cloning from git..."
-                run_cmd sudo git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
-            }
-            success "zsh-autosuggestions installed"
-        fi
-
-        # zsh-syntax-highlighting
-        if [[ -f "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-            success "zsh-syntax-highlighting already installed"
-        elif dpkg -s zsh-syntax-highlighting &>/dev/null 2>&1; then
-            success "zsh-syntax-highlighting already installed"
-        else
-            info "Installing zsh-syntax-highlighting..."
-            run_cmd sudo apt-get install -y zsh-syntax-highlighting 2>/dev/null || {
-                info "apt package not available, cloning from git..."
-                run_cmd sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting"
-            }
-            success "zsh-syntax-highlighting installed"
-        fi
+        # OMZ ships zsh-autosuggestions, zsh-syntax-highlighting, fzf,
+        # zoxide and fnm as plugins — no separate apt packages needed.
+        install_oh_my_zsh
 
         ZSH_PATH="$(which zsh)"
         if [[ "$SHELL" != "$ZSH_PATH" ]]; then
@@ -1320,29 +1295,8 @@ else
         warn "Backed up existing .zshrc"
     fi
 
-    if [[ "$OS" == "macos" ]]; then
-        run_cmd cp "$CONFIGS_DIR/.zshrc" "$HOME/.zshrc"
-    else
-        # Deploy and patch for Linux
-        run_cmd cp "$CONFIGS_DIR/.zshrc" "$HOME/.zshrc"
-
-        # Patch Homebrew paths → Linux paths
-        sed -i '/# ─── Homebrew/i # ─── Local bin (Linux) ───────────────────────────────────────────────\nexport PATH="$HOME/.local/bin:$PATH"\n' "$HOME/.zshrc"
-        sed -i '/export PATH="\/opt\/homebrew\/bin:\/opt\/homebrew\/sbin:\$PATH"/d' "$HOME/.zshrc"
-
-        # Patch zsh plugin source paths
-        sed -i 's|/opt/homebrew/share/zsh-syntax-highlighting/|/usr/share/zsh-syntax-highlighting/|g' "$HOME/.zshrc"
-        sed -i 's|/opt/homebrew/share/zsh-autosuggestions/|/usr/share/zsh-autosuggestions/|g' "$HOME/.zshrc"
-        sed -i 's|/opt/homebrew/share/zsh-completions|/usr/share/zsh-completions|g' "$HOME/.zshrc"
-
-        # Patch pnpm path for Linux
-        sed -i 's|\$HOME/Library/pnpm|\$HOME/.local/share/pnpm|g' "$HOME/.zshrc"
-
-        # Add fnm path for Linux (installed to ~/.local/share/fnm)
-        if ! grep -qF '.local/share/fnm' "$HOME/.zshrc" 2>/dev/null; then
-            sed -i '/# ─── fnm/i # fnm binary path (Linux)\nexport PATH="$HOME/.local/share/fnm:$PATH"\n' "$HOME/.zshrc"
-        fi
-    fi
+    # The template branches on $(uname) itself, so no per-OS patching.
+    run_cmd cp "$CONFIGS_DIR/.zshrc" "$HOME/.zshrc"
     success "Zsh config deployed"
 fi
 
