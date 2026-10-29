@@ -138,7 +138,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 ### Debian / Ubuntu
 - Optionally configures the [Tsinghua TUNA apt mirror](https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/) before installing packages
 - CLI tools install via apt where available, GitHub releases for others (delta, lazygit, eza)
-- `bat` → `batcat`, `fd` → `fdfind` — symlinks are created automatically
+- On Debian/Ubuntu `bat` is `batcat` and `fd` is `fdfind` — no aliases are created, so the names stay as apt installed them
 - Fonts install to `~/.local/share/fonts/`
 - Ghostty is not in apt — install manually via [snap, build from source](https://ghostty.org/docs/install), or use another terminal
 - Zsh plugins install via apt or git clone
@@ -155,14 +155,12 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 
 | Shortcut | Expands To |
 |----------|-----------|
-| `ls` | `eza --icons --group-directories-first` |
 | `ll` | `eza -la --icons --group-directories-first` |
 | `lt` | `eza --tree --icons --level=2` |
-| `cat` | `bat` |
-| `find` | `fd` |
-| `grep` | `rg` |
-| `top` | `btop` |
 | `lg` | `lazygit` |
+
+`cat`, `find`, `grep`, `ls`, `top` and `cd` are intentionally **not** overridden —
+the modern tools are called by their own names (`bat`/`batcat`, `fd`/`fdfind`, `rg`, `eza`, `btop`, `z`).
 
 ## fzf Keybindings
 

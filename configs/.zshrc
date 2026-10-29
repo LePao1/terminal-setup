@@ -64,11 +64,16 @@ elif command -v fzf &>/dev/null; then
     eval "$(fzf --zsh 2>/dev/null)"
 fi
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
-# Use fd for fzf if available
+# Use fd for fzf if available (Debian/Ubuntu ship it as 'fdfind')
 if command -v fd &>/dev/null; then
-    export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+    FZF_FINDER=fd
+elif command -v fdfind &>/dev/null; then
+    FZF_FINDER=fdfind
+fi
+if [[ -n "${FZF_FINDER:-}" ]]; then
+    export FZF_DEFAULT_COMMAND="$FZF_FINDER --type f --hidden --follow --exclude .git"
     export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-    export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+    export FZF_ALT_C_COMMAND="$FZF_FINDER --type d --hidden --follow --exclude .git"
 fi
 
 # ─── Zoxide (smart cd) ──────────────────────────────────────────────
@@ -102,13 +107,10 @@ function set-ssh-key() {
 }
 
 # ─── Aliases ─────────────────────────────────────────────────────────
-alias ls='eza --icons --group-directories-first'
+# Only names that don't shadow an existing command: 'ls', 'cat', 'find',
+# 'grep' and 'top' keep their standard behaviour on purpose.
 alias ll='eza -la --icons --group-directories-first'
 alias lt='eza --tree --icons --level=2'
-alias cat='bat'
-alias find='fd'
-alias grep='rg'
-alias top='btop'
 alias lg='lazygit'
 
 # ─── pnpm ────────────────────────────────────────────────────────────

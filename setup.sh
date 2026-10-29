@@ -626,21 +626,9 @@ install_cli_tools_linux() {
         fi
     fi
 
-    # bat is installed as 'batcat' on Debian/Ubuntu — create symlink
-    if has_cmd batcat && ! has_cmd bat; then
-        info "Creating symlink: batcat → bat"
-        mkdir -p "$HOME/.local/bin"
-        run_cmd ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
-        success "bat symlink created"
-    fi
-
-    # fd is installed as 'fdfind' on Debian/Ubuntu — create symlink
-    if has_cmd fdfind && ! has_cmd fd; then
-        info "Creating symlink: fdfind → fd"
-        mkdir -p "$HOME/.local/bin"
-        run_cmd ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
-        success "fd symlink created"
-    fi
+    # Debian/Ubuntu ship these as 'batcat' and 'fdfind'. We deliberately do NOT
+    # create 'bat'/'fd' aliases: a second name for an existing binary invites
+    # confusion. Config and docs handle both names instead.
 
     # Helper: install bundled binary from bin/linux-x86_64/
     install_bundled_bin() {
@@ -1272,21 +1260,17 @@ if [[ "$SHELL_CHOICE" == "fish" ]]; then
     success "Fish config deployed"
 
     # Fish abbreviations (written to config.fish for Fish 3.x & 4.x compat)
-    if ! grep -qF 'abbr -a ls' "$FISH_CONFIG_DIR/config.fish" 2>/dev/null; then
+    if ! grep -qF 'abbr -a ll' "$FISH_CONFIG_DIR/config.fish" 2>/dev/null; then
         info "Adding Fish abbreviations to config.fish..."
         cat >> "$FISH_CONFIG_DIR/config.fish" << 'ABBREOF'
 
 # Abbreviations (compatible with Fish 3.x and 4.x)
+# Only names that don't shadow an existing command: 'ls', 'cat', 'find',
+# 'grep', 'top' and 'cd' keep their standard behaviour on purpose.
 if status is-interactive
-    abbr -a ls "eza --icons --group-directories-first"
     abbr -a ll "eza -la --icons --group-directories-first"
     abbr -a lt "eza --tree --icons --level=2"
-    abbr -a cat "bat"
-    abbr -a find "fd"
-    abbr -a grep "rg"
-    abbr -a top "btop"
     abbr -a lg "lazygit"
-    abbr -a cd "z"
 end
 ABBREOF
         success "Fish abbreviations added to config.fish"
@@ -1306,9 +1290,14 @@ zoxide init fish | source
 fzf --fish | source
 set -gx FZF_DEFAULT_OPTS '--height 40% --layout=reverse --border'
 if command -q fd
-    set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
+    set -gx FZF_FINDER fd
+else if command -q fdfind
+    set -gx FZF_FINDER fdfind
+end
+if set -q FZF_FINDER
+    set -gx FZF_DEFAULT_COMMAND "$FZF_FINDER --type f --hidden --follow --exclude .git"
     set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
-    set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
+    set -gx FZF_ALT_C_COMMAND "$FZF_FINDER --type d --hidden --follow --exclude .git"
 end
 FISHEOF
         success "Zoxide + fzf init added"

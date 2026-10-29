@@ -138,7 +138,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 ### Debian / Ubuntu
 - 安装软件前可选配置 [清华 TUNA apt 镜像源](https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/)
 - CLI 工具优先用 apt 安装，apt 没有的从 GitHub releases 下载（delta、lazygit、eza）
-- `bat` 在 Debian 上叫 `batcat`，`fd` 叫 `fdfind` — 脚本会自动创建软链接
+- `bat` 在 Debian 上叫 `batcat`，`fd` 叫 `fdfind` — 脚本不会创建别名，保持 apt 安装时的原名
 - 字体安装到 `~/.local/share/fonts/`
 - Ghostty 不在 apt 里 — 可通过 [snap、源码编译](https://ghostty.org/docs/install) 安装，或用其他终端
 - Zsh 插件通过 apt 或 git clone 安装
@@ -155,14 +155,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/lewislulu/terminal-setup/mai
 
 | 快捷方式 | 展开为 |
 |----------|--------|
-| `ls` | `eza --icons --group-directories-first` |
 | `ll` | `eza -la --icons --group-directories-first` |
 | `lt` | `eza --tree --icons --level=2` |
-| `cat` | `bat` |
-| `find` | `fd` |
-| `grep` | `rg` |
-| `top` | `btop` |
 | `lg` | `lazygit` |
+
+`cat`、`find`、`grep`、`ls`、`top`、`cd` **刻意不覆盖** —— 现代工具用它们自己的名字调用（`bat`/`batcat`、`fd`/`fdfind`、`rg`、`eza`、`btop`、`z`）。
 
 ## fzf 快捷键
 
