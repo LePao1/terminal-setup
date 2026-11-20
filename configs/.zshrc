@@ -1,6 +1,6 @@
 #!/bin/zsh
 # ─── terminal-setup: Zsh config ─────────────────────────────────────
-# Powered by: Oh My Zsh + Starship + zsh-autosuggestions
+# Powered by: Oh My Zsh + zsh-autosuggestions
 #             + zsh-syntax-highlighting + fzf + zoxide + fnm
 
 # ─── Local bin ───────────────────────────────────────────────────────
@@ -9,8 +9,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # ─── Oh My Zsh ───────────────────────────────────────────────────────
 export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
 
-# Starship draws the prompt; OMZ must not install a theme of its own.
-ZSH_THEME=""
+ZSH_THEME="robbyrussell"
 
 # Load order matters: zsh-syntax-highlighting must stay last so the
 # widgets registered by the other plugins are still highlighted.
@@ -31,11 +30,6 @@ DISABLE_AUTO_UPDATE=true
 DISABLE_UPDATE_PROMPT=true
 
 source "$ZSH/oh-my-zsh.sh"
-
-# ─── Starship prompt ─────────────────────────────────────────────────
-if command -v starship &>/dev/null; then
-    eval "$(starship init zsh)"
-fi
 
 # ─── History ─────────────────────────────────────────────────────────
 HISTSIZE=50000
