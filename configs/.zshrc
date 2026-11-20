@@ -29,6 +29,10 @@ plugins=(
 DISABLE_AUTO_UPDATE=true
 DISABLE_UPDATE_PROMPT=true
 
+# Make fnm available before OMZ loads its plugin and initialize Node.
+export PATH="$HOME/.local/share/fnm:$PATH"
+zstyle ':omz:plugins:fnm' autostart yes
+
 source "$ZSH/oh-my-zsh.sh"
 
 # ─── History ─────────────────────────────────────────────────────────
@@ -68,9 +72,6 @@ if [[ -n "${FZF_FINDER:-}" ]]; then
     export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
     export FZF_ALT_C_COMMAND="$FZF_FINDER --type d --hidden --follow --exclude .git"
 fi
-
-# fnm binary path (Linux installs to ~/.local/share/fnm)
-export PATH="$HOME/.local/share/fnm:$PATH"
 
 # ─── SSH key switcher (fallback for multi-account setups) ────────────
 # Usage: set-ssh-key lewis-official-20260224
